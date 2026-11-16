@@ -6,16 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Arcade Vault: a platform for playing games online and competing for the highest score (per README, in Spanish). The project follows Spec Driven Design using the `/spec` and `/spec-impl` skills from `Klerith/fernando-skills` (installed via `npx skills@latest add Klerith/fernando-skills`). Currently it is a fresh Create Next App scaffold (`app/layout.tsx`, `app/page.tsx`, `app/globals.css`) with no game code yet.
 
-## Commands
 
-- `npm run dev` — dev server (Turbopack)
-- `npm run build` / `npm run start` — production build / serve
-- `npm run lint` — ESLint (flat config, `eslint.config.mjs`); lint a single file with `npx eslint path/to/file.tsx`
-- No test runner is configured.
 
 ## Next.js version warning
 
 Next 16.4.6 / React 19.3 — APIs differ from older training data. Per `AGENTS.md`, read the relevant guide in `node_modules/next/dist/docs/` (`01-app`, `02-pages`, `03-architecture`, `04-community`) before writing Next.js code, and heed deprecation notices. `next dev` re-adds the `AGENTS.md` block if removed.
+
+## Skills
+Usa siempre /frontend-design para diseñar interfaces de usuario
+
 
 ## Configuration notes
 
