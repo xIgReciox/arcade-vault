@@ -15,6 +15,9 @@ https://github.com/Klerith/fernando-skills
 npx skills@latest add Klerith/fernando-skills
 ```
 
-## Hola Mundo
+## Commands
 
-## Hola Mundo 2
+- `npm run dev` — dev server (Turbopack)
+- `npm run build` / `npm run start` — production build / serve
+- `npm run lint` — ESLint (flat config, `eslint.config.mjs`); lint a single file with `npx eslint path/to/file.tsx`
+- No test runner is configured.
