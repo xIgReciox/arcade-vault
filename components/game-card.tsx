@@ -25,7 +25,7 @@ export function GameCard({ game }: { game: Game }) {
     el.style.transform = "";
   };
 
-  const href = `/juegos/${game.id}`;
+  const href = `/games/${game.id}`;
   const btnColor =
     game.color === "magenta" ? " magenta" : game.color === "yellow" ? " yellow" : "";
 
