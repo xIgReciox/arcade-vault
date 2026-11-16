@@ -16,12 +16,12 @@ export function AuthForm() {
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     login({ name: (user || "PLAYER1").toUpperCase().slice(0, 10) });
-    router.push("/");
+    router.push("/games");
   };
 
   const playAsGuest = () => {
     signOut(); // sin sesión: no se guarda av_user
-    router.push("/");
+    router.push("/games");
   };
 
   return (
