@@ -1,6 +1,6 @@
 # SPEC 02 — Home (landing page) y reubicación de la Biblioteca en /games
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01
 > **Date:** 2026-11-16
 > **Objective:** Convertir `/` en la landing page del template `references/templates/home-about/home.jsx` y mover la Biblioteca y las rutas de juego de `/` y `/juegos/*` a `/games` y `/games/*`.
