@@ -1,0 +1,8 @@
+.next
+node_modules
+.agents
+.playwright-mcp
+.playwright-screenshots
+references
+package-lock.json
+tsconfig.tsbuildinfo
