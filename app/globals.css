@@ -197,6 +197,11 @@ a { color: inherit; text-decoration: none; }
   .av-nav .coin-counter { display: none; }
   .av-nav .hamburger { display: inline-flex; }
 }
+/* Evita scroll horizontal en pantallas muy estrechas (375px) */
+@media (max-width: 480px) {
+  .av-nav { gap: 8px; }
+  .av-nav .auth-btn { margin-left: 0; }
+}
 
 .av-mobile-panel {
   position: fixed;
