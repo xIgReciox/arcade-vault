@@ -1,6 +1,6 @@
 # SPEC 04 — Integración base de Supabase en Next.js
 
-> **Status:** Aprobado
+> **Status:** Implementado
   **Depends on:** SPEC 03
 > **Date:** 2026-11-17
 > **Objective:** Instalar y configurar los clientes de Supabase (navegador y servidor) con `@supabase/ssr` y la publishable key, sin tocar todavía ninguna pantalla, tabla ni flujo de login.
