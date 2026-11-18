@@ -5,9 +5,22 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { AsteroidsCanvas } from "@/components/games/asteroids-canvas";
 import type { AsteroidsSnapshot } from "@/lib/asteroids/engine";
+import { submitScore } from "@/app/games/actions";
 import type { Game, SavedScore } from "@/lib/games";
+import { PLAYER_NAME_RE } from "@/lib/scores-shared";
 
 const SCORES_KEY = "av_scores";
+const PLAYER_NAME_KEY = "av_player_name";
+
+// Deja solo A-Z, 0-9 y _ en mayúsculas, máx. 12 (formato de nombre de ASTEROIDS).
+function sanitizePlayerName(raw: string): string {
+  return raw
+    .toUpperCase()
+    .replace(/[^A-Z0-9_]/g, "")
+    .slice(0, 12);
+}
+
+type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 function saveScore(entry: Omit<SavedScore, "at">) {
   try {
@@ -34,7 +47,15 @@ export function GamePlayer({ game }: { game: Game }) {
   const [engineLevel, setEngineLevel] = useState(1);
   const [restartKey, setRestartKey] = useState(0);
 
+  // ASTEROIDS: nombre del ranking (Supabase). Prellenado tras montar para no desajustar la hidratación.
+  const [storedName, setStoredName] = useState<string | null>(null);
+  const [asteroidsNameEdit, setAsteroidsNameEdit] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [saveError, setSaveError] = useState("");
+
   const name = nameEdit ?? user?.name ?? "INVITADO";
+  const asteroidsName = asteroidsNameEdit ?? storedName ?? sanitizePlayerName(user?.name ?? "");
+  const asteroidsNameValid = PLAYER_NAME_RE.test(asteroidsName);
   // Nivel derivado de la puntuación (juegos simulados): sube cada 2500 puntos.
   const level = isAsteroids ? engineLevel : Math.floor(score / 2500) + 1;
 
@@ -51,6 +72,41 @@ export function GamePlayer({ game }: { game: Game }) {
   };
 
   useEffect(() => {
+    if (!isAsteroids) return;
+    try {
+      const stored = localStorage.getItem(PLAYER_NAME_KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- lectura única tras montar (localStorage)
+      if (stored && PLAYER_NAME_RE.test(stored)) setStoredName(stored);
+    } catch {
+      // localStorage bloqueado: sin prellenado desde av_player_name.
+    }
+  }, [isAsteroids]);
+
+  const handleSaveAsteroids = async () => {
+    if (!asteroidsNameValid || saveStatus === "saving") return;
+    setSaveStatus("saving");
+    setSaveError("");
+    try {
+      const result = await submitScore({ gameId: game.id, playerName: asteroidsName, score });
+      if (result.ok) {
+        try {
+          localStorage.setItem(PLAYER_NAME_KEY, asteroidsName);
+        } catch {
+          // localStorage bloqueado: el guardado en Supabase no depende de él.
+        }
+        setStoredName(asteroidsName);
+        setSaveStatus("saved");
+      } else {
+        setSaveError(result.error);
+        setSaveStatus("error");
+      }
+    } catch {
+      setSaveError("No se pudo conectar. Inténtalo de nuevo.");
+      setSaveStatus("error");
+    }
+  };
+
+  useEffect(() => {
     if (isAsteroids || over || paused) return;
     const t = setInterval(() => setScore((s) => s + Math.floor(10 + Math.random() * 90)), 220);
     return () => clearInterval(t);
@@ -63,6 +119,8 @@ export function GamePlayer({ game }: { game: Game }) {
     setPaused(false);
     setOver(false);
     setSaved(false);
+    setSaveStatus("idle");
+    setSaveError("");
     setRestartKey((k) => k + 1);
   };
 
@@ -168,7 +226,38 @@ export function GamePlayer({ game }: { game: Game }) {
             <h2>FIN DEL JUEGO</h2>
             <div className="final-label">PUNTUACIÓN FINAL</div>
             <div className="final">{score.toLocaleString("es-ES")}</div>
-            {!saved ? (
+            {isAsteroids ? (
+              saveStatus !== "saved" ? (
+                <>
+                  <div className="input-row">
+                    <input
+                      value={asteroidsName}
+                      onChange={(e) => setAsteroidsNameEdit(sanitizePlayerName(e.target.value))}
+                      placeholder="TU NOMBRE (3-12)"
+                      disabled={saveStatus === "saving"}
+                    />
+                    <button
+                      className="btn yellow"
+                      onClick={handleSaveAsteroids}
+                      disabled={!asteroidsNameValid || saveStatus === "saving"}
+                    >
+                      {saveStatus === "saving" ? "GUARDANDO…" : "GUARDAR PUNTUACIÓN"}
+                    </button>
+                  </div>
+                  {saveStatus === "error" && (
+                    <div
+                      role="alert"
+                      className="mono"
+                      style={{ color: "var(--magenta)", fontSize: 11, letterSpacing: "0.08em" }}
+                    >
+                      {saveError}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>
+              )
+            ) : !saved ? (
               <div className="input-row">
                 <input
                   value={name}

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { GAMES, getGame, seededScores } from "@/lib/games";
+import { getLeaderboard, getRegisteredGameIds } from "@/lib/scores";
 
 export function generateStaticParams() {
   return GAMES.map((g) => ({ id: g.id }));
@@ -29,7 +30,9 @@ async function GameDetail({ params }: { params: PageProps<"/games/[id]">["params
   const game = getGame(id);
   if (!game) notFound();
 
-  const scores = seededScores(id.length * 17 + 3, 10);
+  // Juegos registrados en `games` (hoy ASTEROIDS): ranking real. El resto conserva seededScores.
+  const isRegistered = (await getRegisteredGameIds()).includes(id);
+  const scores = isRegistered ? await getLeaderboard(id, 10) : seededScores(id.length * 17 + 3, 10);
 
   return (
     <div className="av-detail fade-in">
@@ -84,9 +87,23 @@ async function GameDetail({ params }: { params: PageProps<"/games/[id]">["params
       <aside>
         <div className="leaderboard">
           <h3>MEJORES PUNTUACIONES</h3>
+          {scores.length === 0 && (
+            <div
+              className="mono"
+              style={{
+                padding: "28px 12px",
+                textAlign: "center",
+                fontSize: 11,
+                letterSpacing: "0.16em",
+                color: "var(--ink-faint)",
+              }}
+            >
+              AÚN NO HAY PUNTUACIONES · SÉ EL PRIMERO
+            </div>
+          )}
           {scores.map((r, i) => (
             <div
-              key={r.name}
+              key={r.rank}
               className={
                 "lb-row" + (i === 0 ? " top1" : i === 1 ? " top2" : i === 2 ? " top3" : "")
               }
