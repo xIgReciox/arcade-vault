@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
+import { AsteroidsCanvas } from "@/components/games/asteroids-canvas";
+import type { AsteroidsSnapshot } from "@/lib/asteroids/engine";
 import type { Game, SavedScore } from "@/lib/games";
 
 const SCORES_KEY = "av_scores";
@@ -27,25 +29,41 @@ export function GamePlayer({ game }: { game: Game }) {
   // null = sin editar; así el nombre sigue a la sesión (que se lee tras montar).
   const [nameEdit, setNameEdit] = useState<string | null>(null);
 
+  // ASTEROIDS es el único juego real: score/vidas/nivel/pausa vienen del motor.
+  const isAsteroids = game.id === "asteroids";
+  const [engineLevel, setEngineLevel] = useState(1);
+  const [restartKey, setRestartKey] = useState(0);
+
   const name = nameEdit ?? user?.name ?? "INVITADO";
-  // Nivel derivado de la puntuación: sube cada 2500 puntos.
-  const level = Math.floor(score / 2500) + 1;
+  // Nivel derivado de la puntuación (juegos simulados): sube cada 2500 puntos.
+  const level = isAsteroids ? engineLevel : Math.floor(score / 2500) + 1;
+
+  const handleEngineChange = (s: AsteroidsSnapshot) => {
+    setScore(s.score);
+    setLives(s.lives);
+    setEngineLevel(s.level);
+    setPaused(s.status === "paused");
+  };
+
+  const handleGameOver = (finalScore: number) => {
+    setScore(finalScore);
+    setOver(true);
+  };
 
   useEffect(() => {
-    if (over || paused) return;
-    const t = setInterval(
-      () => setScore((s) => s + Math.floor(10 + Math.random() * 90)),
-      220,
-    );
+    if (isAsteroids || over || paused) return;
+    const t = setInterval(() => setScore((s) => s + Math.floor(10 + Math.random() * 90)), 220);
     return () => clearInterval(t);
-  }, [over, paused]);
+  }, [isAsteroids, over, paused]);
 
   const restart = () => {
     setScore(0);
     setLives(3);
+    setEngineLevel(1);
     setPaused(false);
     setOver(false);
     setSaved(false);
+    setRestartKey((k) => k + 1);
   };
 
   return (
@@ -72,10 +90,23 @@ export function GamePlayer({ game }: { game: Game }) {
           </div>
         </div>
         <div className="hud-actions">
-          <button className="btn yellow" onClick={() => setPaused((p) => !p)}>
+          {/* blur(): evita que Espacio vuelva a pulsar el botón en lugar de disparar */}
+          <button
+            className="btn yellow"
+            onClick={(e) => {
+              e.currentTarget.blur();
+              setPaused((p) => !p);
+            }}
+          >
             {paused ? "REANUDAR" : "PAUSA"}
           </button>
-          <button className="btn magenta" onClick={() => setOver(true)}>
+          <button
+            className="btn magenta"
+            onClick={(e) => {
+              e.currentTarget.blur();
+              setOver(true);
+            }}
+          >
             FIN
           </button>
           <Link href={`/games/${game.id}`} className="btn ghost">
@@ -86,13 +117,23 @@ export function GamePlayer({ game }: { game: Game }) {
 
       <div className="crt">
         <div className="crt-screen">
-          <div className="game-arena">
-            <div className="grid-floor"></div>
-            <div className="enemy e1"></div>
-            <div className="enemy e2"></div>
-            <div className="enemy e3"></div>
-            <div className="player-ship"></div>
-          </div>
+          {isAsteroids ? (
+            <AsteroidsCanvas
+              paused={paused}
+              restartKey={restartKey}
+              ended={over}
+              onChange={handleEngineChange}
+              onGameOver={handleGameOver}
+            />
+          ) : (
+            <div className="game-arena">
+              <div className="grid-floor"></div>
+              <div className="enemy e1"></div>
+              <div className="enemy e2"></div>
+              <div className="enemy e3"></div>
+              <div className="player-ship"></div>
+            </div>
+          )}
           {paused && (
             <div className="crt-content" style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}>
               <div>
@@ -148,7 +189,13 @@ export function GamePlayer({ game }: { game: Game }) {
               <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>
             )}
             <div className="actions">
-              <button className="btn" onClick={restart}>
+              <button
+                className="btn"
+                onClick={(e) => {
+                  e.currentTarget.blur();
+                  restart();
+                }}
+              >
                 JUGAR DE NUEVO
               </button>
               <Link href="/games" className="btn magenta">
