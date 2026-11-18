@@ -1,22 +1,30 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { GAMES, getGame, seededScores } from "@/lib/games";
 
 export function generateStaticParams() {
   return GAMES.map((g) => ({ id: g.id }));
 }
 
-export async function generateMetadata({
-  params,
-}: PageProps<"/games/[id]">): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<"/games/[id]">): Promise<Metadata> {
   const { id } = await params;
   const game = getGame(id);
   if (!game) return { title: "Juego no encontrado · Arcade Vault" };
   return { title: `${game.title} · Arcade Vault`, description: game.short };
 }
 
-export default async function GameDetailPage({ params }: PageProps<"/games/[id]">) {
+// `params` se lee dentro de <Suspense> para que el App Shell no dependa de la URL.
+export default function GameDetailPage({ params }: PageProps<"/games/[id]">) {
+  return (
+    <Suspense fallback={null}>
+      <GameDetail params={params} />
+    </Suspense>
+  );
+}
+
+async function GameDetail({ params }: { params: PageProps<"/games/[id]">["params"] }) {
   const { id } = await params;
   const game = getGame(id);
   if (!game) notFound();
@@ -79,7 +87,9 @@ export default async function GameDetailPage({ params }: PageProps<"/games/[id]"
           {scores.map((r, i) => (
             <div
               key={r.name}
-              className={"lb-row" + (i === 0 ? " top1" : i === 1 ? " top2" : i === 2 ? " top3" : "")}
+              className={
+                "lb-row" + (i === 0 ? " top1" : i === 1 ? " top2" : i === 2 ? " top3" : "")
+              }
             >
               <div className="rk">#{String(r.rank).padStart(2, "0")}</div>
               <div className="pl">

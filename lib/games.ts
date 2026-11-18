@@ -35,6 +35,17 @@ export interface SavedScore {
 
 export const GAMES: Game[] = [
   {
+    id: "asteroids",
+    title: "ASTEROIDS",
+    short: "Destruye asteroides en un espacio sin bordes.",
+    long: "Pilota una nave vectorial en un campo de asteroides donde los bordes se conectan. Rota, propulsa y dispara: las rocas grandes se parten en medianas y las medianas en pequeñas. Recoge el power-up 3x para disparo triple.",
+    cat: "SHOOTER",
+    cover: "cover-asteroids",
+    color: "cyan",
+    best: 32150,
+    plays: "1.2K",
+  },
+  {
     id: "bloque-buster",
     title: "BLOQUE BUSTER",
     short: "Rebota la pelota y destruye muros de neón.",
