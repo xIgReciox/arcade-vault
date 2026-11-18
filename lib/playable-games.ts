@@ -20,6 +20,15 @@ export const PLAYABLE_GAMES: Record<string, PlayableGame> = {
     height: 600,
     label: "Juego ASTEROIDS",
   },
+  tetris: {
+    load: async () => {
+      const { TetrisEngine } = await import("@/lib/tetris/engine");
+      return (canvas, cb) => new TetrisEngine(canvas, cb);
+    },
+    width: 800,
+    height: 600,
+    label: "Juego TETRIS",
+  },
 };
 
 export function getPlayable(id: string): PlayableGame | undefined {
