@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { AsteroidsCanvas } from "@/components/games/asteroids-canvas";
-import type { AsteroidsSnapshot } from "@/lib/asteroids/engine";
+import type { GameSnapshot } from "@/lib/game-engine";
 import { submitScore } from "@/app/games/actions";
 import type { Game, SavedScore } from "@/lib/games";
 import { PLAYER_NAME_RE } from "@/lib/scores-shared";
@@ -35,7 +35,7 @@ function saveScore(entry: Omit<SavedScore, "at">) {
 export function GamePlayer({ game }: { game: Game }) {
   const { user } = useAuth();
   const [score, setScore] = useState(0);
-  const [lives, setLives] = useState(3);
+  const [lives, setLives] = useState<number | null>(3);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -44,7 +44,7 @@ export function GamePlayer({ game }: { game: Game }) {
 
   // ASTEROIDS es el único juego real: score/vidas/nivel/pausa vienen del motor.
   const isAsteroids = game.id === "asteroids";
-  const [engineLevel, setEngineLevel] = useState(1);
+  const [engineLevel, setEngineLevel] = useState<number | null>(1);
   const [restartKey, setRestartKey] = useState(0);
 
   // ASTEROIDS: nombre del ranking (Supabase). Prellenado tras montar para no desajustar la hidratación.
@@ -59,7 +59,7 @@ export function GamePlayer({ game }: { game: Game }) {
   // Nivel derivado de la puntuación (juegos simulados): sube cada 2500 puntos.
   const level = isAsteroids ? engineLevel : Math.floor(score / 2500) + 1;
 
-  const handleEngineChange = (s: AsteroidsSnapshot) => {
+  const handleEngineChange = (s: GameSnapshot) => {
     setScore(s.score);
     setLives(s.lives);
     setEngineLevel(s.level);
@@ -140,11 +140,11 @@ export function GamePlayer({ game }: { game: Game }) {
           </div>
           <div className="hud-stat lives">
             <div className="l">Vidas</div>
-            <div className="v">{"♥ ".repeat(lives).trim() || "—"}</div>
+            <div className="v">{lives === null ? "—" : "♥ ".repeat(lives).trim() || "—"}</div>
           </div>
           <div className="hud-stat level">
             <div className="l">Nivel</div>
-            <div className="v">{String(level).padStart(2, "0")}</div>
+            <div className="v">{level === null ? "—" : String(level).padStart(2, "0")}</div>
           </div>
         </div>
         <div className="hud-actions">

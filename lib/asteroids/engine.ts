@@ -10,29 +10,23 @@ import {
   POWERUP_GUARANTEED_KILLS,
   W,
 } from "./constants";
+import type { GameCallbacks, GameEngine, GameSnapshot, GameStatus } from "@/lib/game-engine";
 import { Asteroid, Bullet, Particle, PowerUp, Ship } from "./entities";
 import { Input } from "./input";
 import { dist, rand } from "./utils";
 
-export type AsteroidsStatus = "playing" | "dead" | "paused" | "gameover";
+export type AsteroidsStatus = GameStatus;
 
-export interface AsteroidsSnapshot {
-  score: number;
-  lives: number;
-  level: number;
-  status: AsteroidsStatus;
-}
+// ASTEROIDS siempre tiene vidas y nivel: se estrechan `lives` y `level` a number.
+export type AsteroidsSnapshot = GameSnapshot & { lives: number; level: number };
 
-export interface AsteroidsCallbacks {
-  onChange: (s: AsteroidsSnapshot) => void; // solo cuando cambia score/lives/level/status
-  onGameOver: (finalScore: number) => void;
-}
+export type AsteroidsCallbacks = GameCallbacks;
 
 const MAX_DT = 0.05; // 50 ms
 const RESPAWN_DELAY = 2;
 const SAFE_DIST = 130;
 
-export class AsteroidsEngine {
+export class AsteroidsEngine implements GameEngine {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private callbacks: AsteroidsCallbacks;
