@@ -1,6 +1,6 @@
 # SPEC 06 — Tabla `games` y leaderboard real de ASTEROIDS en Supabase
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 04, SPEC 05
 > **Date:** 2026-11-18
 > **Objective:** Crear en Supabase las tablas `games` (solo con ASTEROIDS) y `scores`, guardar ahí las puntuaciones de ASTEROIDS mediante una Server Action con nombre libre (sin Auth) y mostrarlas como ranking real en el detalle del juego y en el Salón de la Fama.
