@@ -1,6 +1,6 @@
 # SPEC 07 — Registro genérico de juegos jugables
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 05, SPEC 06
 > **Date:** 2026-11-18
 > **Objective:** Sustituir la rama fija `isAsteroids` de `GamePlayer` por un contrato común de motor y un registro de juegos jugables, de modo que añadir un juego nuevo sea registrar una entrada, sin cambiar el comportamiento de ASTEROIDS.
