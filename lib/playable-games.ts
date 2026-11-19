@@ -41,6 +41,18 @@ export const PLAYABLE_GAMES: Record<string, PlayableGame> = {
     height: 600,
     label: "Juego ARKANOID",
   },
+  snake: {
+    load: async () => {
+      // Precarga fruits.png; nunca rechaza (si falla, `fruits` es null y la fruta se dibuja como círculo).
+      const { loadSnakeAssets } = await import("@/lib/snake/assets");
+      const assets = await loadSnakeAssets();
+      const { SnakeEngine } = await import("@/lib/snake/engine");
+      return (canvas, cb) => new SnakeEngine(canvas, cb, assets);
+    },
+    width: 800,
+    height: 600,
+    label: "Juego SNAKE",
+  },
 };
 
 export function getPlayable(id: string): PlayableGame | undefined {
