@@ -1,6 +1,6 @@
 # SPEC 09 — Juego ARKANOID jugable con leaderboard real
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 05, SPEC 06, SPEC 07, SPEC 08
 > **Date:** 2026-11-19
 > **Objective:** Portar `references/started-games/04-arkanoid` a un motor TypeScript encapsulado, hacerlo jugable en `/games/arkanoid/jugar` y registrarlo en el leaderboard real, sustituyendo al mock BLOQUE BUSTER.
