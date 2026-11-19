@@ -29,6 +29,18 @@ export const PLAYABLE_GAMES: Record<string, PlayableGame> = {
     height: 600,
     label: "Juego TETRIS",
   },
+  arkanoid: {
+    load: async () => {
+      // Precarga spritesheet y sonidos; nunca rechaza (un asset que falla queda en null).
+      const { loadArkanoidAssets } = await import("@/lib/arkanoid/assets");
+      const assets = await loadArkanoidAssets();
+      const { ArkanoidEngine } = await import("@/lib/arkanoid/engine");
+      return (canvas, cb) => new ArkanoidEngine(canvas, cb, assets);
+    },
+    width: 800,
+    height: 600,
+    label: "Juego ARKANOID",
+  },
 };
 
 export function getPlayable(id: string): PlayableGame | undefined {
