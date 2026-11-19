@@ -1,6 +1,6 @@
 # SPEC 10 — Juego SNAKE jugable con leaderboard real
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 05, SPEC 06, SPEC 07, SPEC 09
 > **Date:** 2026-11-19
 > **Objective:** Crear SNAKE desde cero como juego jugable en `/games/snake/jugar`, con frutas del atlas `references/source-assets/snake-assets`, y registrarlo en el leaderboard real sustituyendo al mock SERPENTINA.
