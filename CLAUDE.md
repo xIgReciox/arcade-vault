@@ -12,7 +12,6 @@ Current state (specs 01–10 implemented):
 - Playable games (real canvas engines): **ASTEROIDS**, **TETRIS**, **ARKANOID**, **SNAKE** and more. Other entries in `GAMES` are mocks with a simulated player.
   (see references/implemented-games.md) when you need to check with games are implemented and how to implementent new ones.
 
-
 - Real leaderboards in Supabase (`games` + `scores` tables). Auth is still a localStorage mock (`components/auth-provider.tsx`, key `av_user`); scores are inserted anonymously (`user_id = null`).
 - Contact form sends real email via Resend (`app/about/actions.ts`).
 
@@ -32,10 +31,13 @@ Next 16.4.6 / React 19.3 — APIs differ from older training data. Per `AGENTS.m
 
 Usa siempre /frontend-design para diseñar interfaces de usuario.
 
+Global skills (user level, `~/.claude/skills/` → real files in `~/.agents/skills/`; not in this repo):
+
+- `/spec` — writes a spec in `specs/NN-slug.md` from `template.md` (status Borrador). From `Klerith/fernando-skills`.
+- `/spec-impl` — implements a spec step by step. Configured per project in `specs/.spec-config.yml`: `AutoCreateBranch: true` (creates `spec-NN-slug` branch), `AutoCommitSteps: false` (never commits on its own).
+
 Project skills (`.claude/skills/`):
 
-- `/spec` — writes a spec in `specs/NN-slug.md` from `template.md` (status Borrador). From `Klerith/fernando-skills` (`skills-lock.json`; mirrored in `.agents/skills/`).
-- `/spec-impl` — implements a spec step by step. Configured in `specs/.spec-config.yml`: `AutoCreateBranch: true` (creates `spec-NN-slug` branch), `AutoCommitSteps: false` (never commits on its own).
 - `/add-game` — designs the spec for adding a playable game with a real Supabase leaderboard, ported from `references/started-games/` or from scratch. Only writes the spec; follows the fixed recipe in `.claude/skills/add-game/integration-checklist.md` (plus `port-guide.md`, `spec-template.md`). Read that checklist before implementing any new game.
 
 ## Architecture

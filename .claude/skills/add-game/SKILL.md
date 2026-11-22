@@ -28,7 +28,7 @@ Este skill produce **un spec** para convertir un juego en jugable dentro de `/ga
 
 Es la versión repetible de lo que hicieron SPEC 05 (port de ASTEROIDS), SPEC 06 (leaderboard) y SPEC 07 (registro genérico). Responde en el idioma del prompt inicial (normalmente español).
 
-Método base: este skill **extiende** `/spec`. Antes de escribir el archivo, la Fase 4 obliga a leer `.claude/skills/spec/SKILL.md` y `.claude/skills/spec/template.md` y a seguirlos.
+Método base: este skill **extiende** `/spec`. Antes de escribir el archivo, la Fase 4 obliga a leer `~/.claude/skills/spec/SKILL.md` y `~/.claude/skills/spec/template.md` (skill global) y a seguirlos.
 
 Archivos de apoyo, en esta misma carpeta:
 
