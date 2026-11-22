@@ -40,6 +40,10 @@ Project skills (`.claude/skills/`):
 
 - `/add-game` — designs the spec for adding a playable game with a real Supabase leaderboard, ported from `references/started-games/` or from scratch. Only writes the spec; follows the fixed recipe in `.claude/skills/add-game/integration-checklist.md` (plus `port-guide.md`, `spec-template.md`). Read that checklist before implementing any new game.
 
+Project agents (`.claude/agents/`):
+
+- `game-planner` — decides which game to add next and why it fits the platform (top 3 + one recommendation). Has persistent project memory in `.claude/agent-memory/game-planner/` (`suggestions.md` = history of proposed/accepted/implemented/discarded games) so it never repeats suggestions. Flow: `game-planner` → `/add-game` → `/spec-impl`.
+
 ## Architecture
 
 - `app/` — App Router pages. Server Actions: `app/games/actions.ts` (`submitScore`), `app/about/actions.ts` (`sendContact`).
