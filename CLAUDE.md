@@ -62,6 +62,7 @@ Project agents (`.claude/agents/`):
 - `lib/playable-games.ts` — `PLAYABLE_GAMES` registry keyed by game id: lazy `load()` via `import()` (preloads assets, never rejects), canvas `width`/`height` (800×600), `label`. Client-only.
 - `components/games/game-canvas.tsx` mounts the engine (Strict-Mode safe, auto-pause on tab hide); `components/game-player.tsx` owns HUD, pause, end-of-game modal and score saving. Games not in `PLAYABLE_GAMES` fall back to the simulated player.
 - Game assets go in `public/games/<id>/` and are loaded as `/games/<id>/...`.
+- Skins: every playable game must offer `clasico` (default), `neon` and `retro` (palettes in `lib/<id>/skins.ts`, hot-swappable via `GameEngine.setSkin`, listed in `PlayableGame.skins`). Run the `skin-designer` agent to audit/implement.
 
 ### Supabase
 
@@ -81,4 +82,4 @@ See `.env.example`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABL
 - Path alias: `@/*` maps to the repo root (e.g. `@/lib/...`).
 - App Router only (`app/` at repo root, no `src/`).
 - Prettier (`printWidth: 100`). A PostToolUse hook (`.claude/settings.json` → `.claude/hooks/format-on-write.mjs`) runs Prettier + ESLint on every file written/edited by Claude.
-- localStorage keys: `av_user` (mock session), `av_scores` (mock games' scores), `av_player_name` (last ranking name).
+- localStorage keys: `av_user` (mock session), `av_scores` (mock games' scores), `av_player_name` (last ranking name), `av_skins` (chosen skin per game id).
