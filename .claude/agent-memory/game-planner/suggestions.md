@@ -9,6 +9,7 @@ Estados: `propuesta` → `aceptada` (hay spec) → `implementada`; o `descartada
 | 2026-11-19 | arkanoid     | ARKANOID     | ARCADE    | implementada | SPEC 09, sustituyó al mock BLOQUE BUSTER                                                                 |
 | 2026-11-19 | snake        | SNAKE        | ARCADE    | implementada | SPEC 10, desde cero, sustituyó al mock SERPENTINA                                                        |
 | 2026-11-22 | invasores    | INVASORES    | SHOOTER   | propuesta    | RECOMENDADA 2026-11-22 (4.6/5, M). Desde cero; sugerido color yellow en vez de green para equilibrar     |
+| 2026-11-22 | frogger      | FROGGER      | MAZE      | propuesta    | Cruza la carretera y el río sin convertirte en papilla                                                   |
 | 2026-11-22 | gloton       | GLOTÓN       | ARCADE    | propuesta    | 2º en top 3 2026-11-22 (3.8/5, L). Único que aporta yellow, pero 3er ARCADE e IA de espectros costosa    |
 | 2026-11-22 | duelo-pixel  | DUELO PIXEL  | VERSUS    | propuesta    | 3º en top 3 2026-11-22 (3.2/5, S). Solo vs CPU encaja; score débil (best 24), necesitaría modo puntos    |
 | 2026-11-22 | ranaria      | RANARIA      | ARCADE    | propuesta    | Fuera del top 2026-11-22: sería 3er ARCADE y 3er green                                                   |
