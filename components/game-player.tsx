@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { GameCanvas } from "@/components/games/game-canvas";
+import { SkinPicker } from "@/components/games/skin-picker";
 import type { GameSnapshot } from "@/lib/game-engine";
+import { DEFAULT_SKIN, readStoredSkin, type SkinId, writeStoredSkin } from "@/lib/skins";
 import { getPlayable } from "@/lib/playable-games";
 import { submitScore } from "@/app/games/actions";
 import type { Game, SavedScore } from "@/lib/games";
@@ -47,6 +49,9 @@ export function GamePlayer({ game }: { game: Game }) {
   const playable = getPlayable(game.id);
   const [engineLevel, setEngineLevel] = useState<number | null>(1);
   const [restartKey, setRestartKey] = useState(0);
+  // Skin del juego real: `clasico` en el primer render (hidratación) y luego el de av_skins.
+  const [skin, setSkin] = useState<SkinId>(DEFAULT_SKIN);
+  const playableSkins = playable?.skins;
 
   // Juego real: nombre del ranking (Supabase). Prellenado tras montar para no desajustar la hidratación.
   const [storedRankName, setStoredRankName] = useState<string | null>(null);
@@ -82,6 +87,17 @@ export function GamePlayer({ game }: { game: Game }) {
       // localStorage bloqueado: sin prellenado desde av_player_name.
     }
   }, [playable]);
+
+  useEffect(() => {
+    if (!playableSkins) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- lectura única tras montar (localStorage)
+    setSkin(readStoredSkin(game.id, playableSkins));
+  }, [game.id, playableSkins]);
+
+  const handleSkinChange = (next: SkinId) => {
+    setSkin(next);
+    writeStoredSkin(game.id, next);
+  };
 
   const handleSaveReal = async () => {
     if (!rankNameValid || saveStatus === "saving") return;
@@ -182,6 +198,7 @@ export function GamePlayer({ game }: { game: Game }) {
               paused={paused}
               restartKey={restartKey}
               ended={over}
+              skin={skin}
               onChange={handleEngineChange}
               onGameOver={handleGameOver}
             />
@@ -221,6 +238,10 @@ export function GamePlayer({ game }: { game: Game }) {
           <span>CARGA · 1MB</span>
         </div>
       </div>
+
+      {playable && playable.skins.length > 1 && (
+        <SkinPicker skins={playable.skins} value={skin} onChange={handleSkinChange} />
+      )}
 
       {over && (
         <div className="modal-bd">

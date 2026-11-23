@@ -29,3 +29,8 @@ Historial de cumplimiento: [skins.md](skins.md).
 - Web solo oscura: «modo oscuro» = contraste sobre fondo oscuro, sin modo claro.
 - Selector de skin en `/games/[id]/jugar`, recordado por juego en `localStorage["av_skins"]`.
 - Screenshots en `.playwright-screenshots/`.
+- Juegos aún sin skins van con `skins: ["clasico"]` en `PLAYABLE_GAMES` (sin selector) hasta implementarlos.
+
+## Lecciones
+
+- El hook Prettier reformatea entero cualquier CSS editado (globals.css): estilos del selector en Tailwind dentro de `components/games/skin-picker.tsx`, no en globals.css.

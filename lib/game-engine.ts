@@ -1,3 +1,5 @@
+import type { SkinId } from "@/lib/skins";
+
 export type GameStatus = "playing" | "dead" | "paused" | "gameover";
 
 export interface GameSnapshot {
@@ -19,6 +21,16 @@ export interface GameEngine {
   restart(): void;
   endGame(): void; // usado por el botón FIN
   destroy(): void; // cancela rAF y quita listeners
+  /** Cambia la paleta en caliente sin tocar puntuación, vidas, nivel ni estado. */
+  setSkin?(skin: SkinId): void;
 }
 
-export type GameEngineFactory = (canvas: HTMLCanvasElement, callbacks: GameCallbacks) => GameEngine;
+export interface GameEngineOptions {
+  skin?: SkinId; // paleta inicial (por defecto `clasico`)
+}
+
+export type GameEngineFactory = (
+  canvas: HTMLCanvasElement,
+  callbacks: GameCallbacks,
+  options?: GameEngineOptions,
+) => GameEngine;

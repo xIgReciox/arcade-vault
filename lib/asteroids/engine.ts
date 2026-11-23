@@ -1,18 +1,18 @@
 // Motor del juego ASTEROIDS: estado, colisiones, niveles, dibujo y loop.
 // Port encapsulado de references/started-games/02-asteroids/game.js (sin globals).
 
-import {
-  COLORS,
-  GLOW,
-  H,
-  POWERUP_DROP_CHANCE,
-  POWERUP_DURATION,
-  POWERUP_GUARANTEED_KILLS,
-  W,
-} from "./constants";
-import type { GameCallbacks, GameEngine, GameSnapshot, GameStatus } from "@/lib/game-engine";
-import { Asteroid, Bullet, Particle, PowerUp, Ship } from "./entities";
+import { H, POWERUP_DROP_CHANCE, POWERUP_DURATION, POWERUP_GUARANTEED_KILLS, W } from "./constants";
+import type {
+  GameCallbacks,
+  GameEngine,
+  GameEngineOptions,
+  GameSnapshot,
+  GameStatus,
+} from "@/lib/game-engine";
+import { DEFAULT_SKIN, isSkinId, type SkinId } from "@/lib/skins";
+import { Asteroid, Bullet, Particle, type ParticleKind, PowerUp, Ship } from "./entities";
 import { Input } from "./input";
+import { ASTEROIDS_SKINS, type AsteroidsPalette } from "./skins";
 import { dist, rand } from "./utils";
 
 export type AsteroidsStatus = GameStatus;
@@ -52,8 +52,13 @@ export class AsteroidsEngine implements GameEngine {
   private running = false;
   private destroyed = false;
   private last: AsteroidsSnapshot | null = null;
+  private palette: AsteroidsPalette = ASTEROIDS_SKINS[DEFAULT_SKIN];
 
-  constructor(canvas: HTMLCanvasElement, callbacks: AsteroidsCallbacks) {
+  constructor(
+    canvas: HTMLCanvasElement,
+    callbacks: AsteroidsCallbacks,
+    options: GameEngineOptions = {},
+  ) {
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Canvas 2D no disponible");
     this.canvas = canvas;
@@ -61,6 +66,7 @@ export class AsteroidsEngine implements GameEngine {
     this.canvas.height = H;
     this.ctx = ctx;
     this.callbacks = callbacks;
+    if (options.skin) this.setSkin(options.skin);
     this.ship = new Ship(this.input);
     this.initGame();
   }
@@ -104,6 +110,11 @@ export class AsteroidsEngine implements GameEngine {
   endGame(): void {
     if (this.status === "gameover") return;
     this.setGameOver();
+  }
+
+  // Cambia la paleta en caliente: solo afecta al dibujo (ni estado, ni puntuación, ni RNG).
+  setSkin(skin: SkinId): void {
+    this.palette = ASTEROIDS_SKINS[isSkinId(skin) ? skin : DEFAULT_SKIN];
   }
 
   destroy(): void {
@@ -154,12 +165,12 @@ export class AsteroidsEngine implements GameEngine {
     this.spawnAsteroids(3 + this.level);
   }
 
-  private explode(x: number, y: number, color: string, count = 8): void {
-    for (let i = 0; i < count; i++) this.particles.push(new Particle(x, y, color));
+  private explode(x: number, y: number, kind: ParticleKind, count = 8): void {
+    for (let i = 0; i < count; i++) this.particles.push(new Particle(x, y, kind));
   }
 
   private killShip(): void {
-    this.explode(this.ship.x, this.ship.y, COLORS.cyan, 14);
+    this.explode(this.ship.x, this.ship.y, "ship", 14);
     this.ship.dead = true;
     this.lives--;
     if (this.lives <= 0) {
@@ -269,7 +280,7 @@ export class AsteroidsEngine implements GameEngine {
           b.dead = true;
           a.dead = true;
           this.score += a.points;
-          this.explode(a.x, a.y, COLORS.yellow, a.size * 5);
+          this.explode(a.x, a.y, "asteroid", a.size * 5);
           newAsteroids.push(...a.split());
           if (!this.powerUpSpawned) {
             this.killsSinceSpawn++;
@@ -310,21 +321,22 @@ export class AsteroidsEngine implements GameEngine {
 
   private draw(): void {
     const ctx = this.ctx;
-    ctx.fillStyle = COLORS.bg;
+    const pal = this.palette;
+    ctx.fillStyle = pal.bg;
     ctx.fillRect(0, 0, W, H);
 
-    this.drawParticles(ctx);
-    this.asteroids.forEach((a) => a.draw(ctx));
-    this.powerUps.forEach((u) => u.draw(ctx));
-    this.bullets.forEach((b) => b.draw(ctx));
-    this.ship.draw(ctx);
+    this.drawParticles(ctx, pal);
+    this.asteroids.forEach((a) => a.draw(ctx, pal));
+    this.powerUps.forEach((u) => u.draw(ctx, pal));
+    this.bullets.forEach((b) => b.draw(ctx, pal));
+    this.ship.draw(ctx, pal);
 
     // Indicador de triple disparo (el resto del HUD es React)
     if (this.ship.tripleShot > 0) {
       ctx.save();
-      ctx.shadowColor = COLORS.magenta;
-      ctx.shadowBlur = GLOW;
-      ctx.fillStyle = COLORS.magenta;
+      ctx.shadowColor = pal.hudText;
+      ctx.shadowBlur = pal.glow;
+      ctx.fillStyle = pal.hudText;
       ctx.font = "15px monospace";
       ctx.textAlign = "left";
       ctx.textBaseline = "alphabetic";
@@ -334,13 +346,17 @@ export class AsteroidsEngine implements GameEngine {
   }
 
   // Glow por grupo de color (no por partícula).
-  private drawParticles(ctx: CanvasRenderingContext2D): void {
+  private drawParticles(ctx: CanvasRenderingContext2D, pal: AsteroidsPalette): void {
     if (this.particles.length === 0) return;
-    for (const color of [COLORS.yellow, COLORS.cyan]) {
+    const groups: [ParticleKind, string][] = [
+      ["asteroid", pal.asteroid],
+      ["ship", pal.ship],
+    ];
+    for (const [kind, color] of groups) {
       ctx.save();
       ctx.shadowColor = color;
-      ctx.shadowBlur = GLOW / 2;
-      for (const q of this.particles) if (q.color === color) q.draw(ctx);
+      ctx.shadowBlur = pal.glow / 2;
+      for (const q of this.particles) if (q.kind === kind) q.draw(ctx, color);
       ctx.restore();
     }
   }

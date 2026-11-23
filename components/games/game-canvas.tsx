@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { GameCallbacks, GameEngine } from "@/lib/game-engine";
 import type { PlayableGame } from "@/lib/playable-games";
+import { DEFAULT_SKIN, type SkinId } from "@/lib/skins";
 
 interface GameCanvasProps extends GameCallbacks {
   /** Entrada del registro PLAYABLE_GAMES: motor (carga diferida), resolución y etiqueta. */
@@ -13,6 +14,8 @@ interface GameCanvasProps extends GameCallbacks {
   restartKey: number;
   /** true cuando la partida terminó (modal abierto o botón FIN). */
   ended: boolean;
+  /** Paleta activa; se aplica en caliente con engine.setSkin (no reinicia la partida). */
+  skin?: SkinId;
 }
 
 export function GameCanvas({
@@ -20,6 +23,7 @@ export function GameCanvas({
   paused,
   restartKey,
   ended,
+  skin = DEFAULT_SKIN,
   onChange,
   onGameOver,
 }: GameCanvasProps) {
@@ -29,11 +33,11 @@ export function GameCanvas({
   // Los callbacks y las props de control se leen por ref: no recrean el motor
   // y permiten aplicar el estado actual cuando la carga asíncrona termina.
   const callbacksRef = useRef({ onChange, onGameOver });
-  const controlRef = useRef({ paused, ended, restartKey });
+  const controlRef = useRef({ paused, ended, restartKey, skin });
   const lastRestartKey = useRef(restartKey);
   useEffect(() => {
     callbacksRef.current = { onChange, onGameOver };
-    controlRef.current = { paused, ended, restartKey };
+    controlRef.current = { paused, ended, restartKey, skin };
   });
 
   // Motor: se carga y crea al montar, y se destruye en el cleanup (seguro en Strict Mode).
@@ -51,10 +55,14 @@ export function GameCanvas({
 
     playable.load().then((create) => {
       if (cancelled) return;
-      engine = create(canvas, {
-        onChange: (s) => callbacksRef.current.onChange(s),
-        onGameOver: (score) => callbacksRef.current.onGameOver(score),
-      });
+      engine = create(
+        canvas,
+        {
+          onChange: (s) => callbacksRef.current.onChange(s),
+          onGameOver: (score) => callbacksRef.current.onGameOver(score),
+        },
+        { skin: controlRef.current.skin },
+      );
       engineRef.current = engine;
       lastRestartKey.current = controlRef.current.restartKey;
       engine.start();
@@ -89,6 +97,11 @@ export function GameCanvas({
   useEffect(() => {
     if (ended) engineRef.current?.endGame();
   }, [ended]);
+
+  // Skin en caliente: solo cambia la paleta del motor (si la soporta).
+  useEffect(() => {
+    engineRef.current?.setSkin?.(skin);
+  }, [skin]);
 
   // Reinicio: ignora el primer render (el motor ya arranca de cero).
   useEffect(() => {
