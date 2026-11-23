@@ -41,25 +41,26 @@ export const PLAYABLE_GAMES: Record<string, PlayableGame> = {
       const { loadArkanoidAssets } = await import("@/lib/arkanoid/assets");
       const assets = await loadArkanoidAssets();
       const { ArkanoidEngine } = await import("@/lib/arkanoid/engine");
-      return (canvas, cb) => new ArkanoidEngine(canvas, cb, assets);
+      return (canvas, cb, options) => new ArkanoidEngine(canvas, cb, assets, options);
     },
     width: 800,
     height: 600,
     label: "Juego ARKANOID",
-    skins: ["clasico"], // pendiente: neon y retro
+    skins: SKIN_IDS,
   },
   snake: {
     load: async () => {
-      // Precarga fruits.png; nunca rechaza (si falla, `fruits` es null y la fruta se dibuja como círculo).
+      // Precarga fruits.png y sus variantes por skin; nunca rechaza (si falla, la fruta se
+      // dibuja como círculo; si falla un recoloreado, ese skin usa la hoja original).
       const { loadSnakeAssets } = await import("@/lib/snake/assets");
       const assets = await loadSnakeAssets();
       const { SnakeEngine } = await import("@/lib/snake/engine");
-      return (canvas, cb) => new SnakeEngine(canvas, cb, assets);
+      return (canvas, cb, options) => new SnakeEngine(canvas, cb, assets, options);
     },
     width: 800,
     height: 600,
     label: "Juego SNAKE",
-    skins: ["clasico"], // pendiente: neon y retro
+    skins: SKIN_IDS,
   },
 };
 

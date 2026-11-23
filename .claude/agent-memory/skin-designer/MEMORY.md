@@ -33,4 +33,10 @@ Historial de cumplimiento: [skins.md](skins.md).
 
 ## Lecciones
 
+- El navegador del MCP Playwright puede estar compartido con otros agentes en paralelo (te cambia la URL): usa un script propio con el `playwright` de la caché npx (`~/AppData/Local/npm-cache/_npx/*/node_modules/playwright`, `channel: "chrome"`).
+- Juegos sin acción del jugador acaban solos: para capturas, autopiloto que lee píxeles del canvas y despacha `mousemove`.
+- Contraste de sprites: medir el color medio real en el canvas, no solo el tinte; un clásico heredado bajo 3:1 se anota como ⚠️, no se corrige.
+- Sprites: recolorear por rampa de luminancia [oscuro, claro] del skin; el extremo oscuro debe cumplir ≥ 3:1. Retro: hoja a escala reducida + `imageSmoothingEnabled = false` = look 8-bit.
+- Validar contraste: `node --experimental-strip-types` importando `lib/skins.ts` y `lib/<id>/skins.ts` por `file:///` desde el scratchpad.
+- Probar cambio en caliente: piloto automático en Playwright que lee píxeles del canvas (cabeza/fruta por color de paleta) para sumar puntos antes de cambiar.
 - El hook Prettier reformatea entero cualquier CSS editado (globals.css): estilos del selector en Tailwind dentro de `components/games/skin-picker.tsx`, no en globals.css.

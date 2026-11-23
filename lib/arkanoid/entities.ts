@@ -1,7 +1,6 @@
 // Entidades del juego ARKANOID. Portadas de references/started-games/04-arkanoid/game.js.
-// Dibujan con drawImage desde el spritesheet y no dibujan nada si `sheet` es null.
+// Dibujan con drawImage desde el spritesheet del skin activo y no dibujan nada si `sheet` es null.
 
-import type { ArkanoidAssets } from "./assets";
 import {
   BALL_SIZE,
   BASE_BALL_VX,
@@ -18,20 +17,36 @@ import {
   W,
 } from "./constants";
 import type { LevelBlock } from "./levels";
+import type { ArkanoidPalette } from "./skins";
 import { EXPLOSION_FRAMES, SPRITES, type BlockColor, type Frame } from "./sprites";
 import { clamp, type Rect } from "./utils";
 
+/** Aspecto activo: spritesheet del skin y su paleta (glow y tintes). */
+export interface ArkanoidLook {
+  sheet: CanvasImageSource | null;
+  palette: ArkanoidPalette;
+}
+
+// Dibuja un frame; con `blur` > 0 aplica resplandor del color dado y lo resetea a 0.
 export function drawFrame(
   ctx: CanvasRenderingContext2D,
-  assets: ArkanoidAssets,
+  look: ArkanoidLook,
   frame: Frame,
   x: number,
   y: number,
   w: number,
   h: number,
+  blur = 0,
+  glowColor?: string,
 ): void {
-  if (!assets.sheet) return;
-  ctx.drawImage(assets.sheet, frame.sx, frame.sy, frame.sw, frame.sh, x, y, w, h);
+  if (!look.sheet) return;
+  const glow = blur > 0 && glowColor !== undefined;
+  if (glow) {
+    ctx.shadowBlur = blur;
+    ctx.shadowColor = glowColor;
+  }
+  ctx.drawImage(look.sheet, frame.sx, frame.sy, frame.sw, frame.sh, x, y, w, h);
+  if (glow) ctx.shadowBlur = 0;
 }
 
 export class Paddle implements Rect {
@@ -57,8 +72,9 @@ export class Paddle implements Rect {
     this.dir = 0;
   }
 
-  draw(ctx: CanvasRenderingContext2D, assets: ArkanoidAssets): void {
-    drawFrame(ctx, assets, SPRITES.paddle, this.x, this.y, this.w, this.h);
+  draw(ctx: CanvasRenderingContext2D, look: ArkanoidLook): void {
+    const { glow, tints } = look.palette;
+    drawFrame(ctx, look, SPRITES.paddle, this.x, this.y, this.w, this.h, glow, tints?.paddle);
   }
 }
 
@@ -117,8 +133,9 @@ export class Ball implements Rect {
     return false;
   }
 
-  draw(ctx: CanvasRenderingContext2D, assets: ArkanoidAssets): void {
-    drawFrame(ctx, assets, SPRITES.ball, this.x, this.y, this.w, this.h);
+  draw(ctx: CanvasRenderingContext2D, look: ArkanoidLook): void {
+    const { glow, tints } = look.palette;
+    drawFrame(ctx, look, SPRITES.ball, this.x, this.y, this.w, this.h, glow, tints?.ball);
   }
 }
 
@@ -140,9 +157,20 @@ export class Block implements Rect {
     // Los bloques son estáticos.
   }
 
-  draw(ctx: CanvasRenderingContext2D, assets: ArkanoidAssets): void {
+  draw(ctx: CanvasRenderingContext2D, look: ArkanoidLook): void {
     if (!this.alive) return;
-    drawFrame(ctx, assets, SPRITES.blocks[this.color], this.x, this.y, this.w, this.h);
+    const { glow, tints } = look.palette;
+    drawFrame(
+      ctx,
+      look,
+      SPRITES.blocks[this.color],
+      this.x,
+      this.y,
+      this.w,
+      this.h,
+      glow / 2,
+      tints?.blocks[this.color],
+    );
   }
 }
 
@@ -170,12 +198,12 @@ export class Explosion implements Rect {
     this.elapsed += dt * 1000;
   }
 
-  draw(ctx: CanvasRenderingContext2D, assets: ArkanoidAssets): void {
+  draw(ctx: CanvasRenderingContext2D, look: ArkanoidLook): void {
     const frames = EXPLOSION_FRAMES[this.color];
     const i = Math.min(
       Math.floor((this.elapsed / EXPLOSION_DURATION) * frames.length),
       frames.length - 1,
     );
-    drawFrame(ctx, assets, frames[i], this.x, this.y, this.w, this.h);
+    drawFrame(ctx, look, frames[i], this.x, this.y, this.w, this.h);
   }
 }
