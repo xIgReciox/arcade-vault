@@ -44,6 +44,7 @@ Project agents (`.claude/agents/`):
 
 - `game-planner` — decides which game to add next and why it fits the platform (top 3 + one recommendation). Has persistent project memory in `.claude/agent-memory/game-planner/` (`suggestions.md` = history of proposed/accepted/implemented/discarded games) so it never repeats suggestions. Flow: `game-planner` → `/add-game` → `/spec-impl`.
 - `game-jam` — given a theme, autonomously designs one original game and writes 3 chained specs (`01-<id>-juego.md`, `02-<id>-pulido.md`, `03-<id>-contenido.md`) in `specs/game-jam/<id>/`, in the format of SPEC 08–10 and status Borrador. Never asks questions; every choice goes in each spec's Decisiones. Memory in `.claude/agent-memory/game-jam/` (`jams.md` = history of themes/games); reads the game-planner's memory but never writes it. Flow: `game-jam <tema>` → human review/approval → `/spec-impl <path>`.
+- `skin-designer` — audits that every playable game has the skins `clasico` (default), `neon` and `retro`, implements the missing ones (shared `lib/skins.ts`, per-game `lib/<id>/skins.ts`, `setSkin` on the engine, selector in the player) and checks contrast on the dark background (the site is dark-only). Args: none (all games), `<id>`, or "solo auditar" (report only). Memory in `.claude/agent-memory/skin-designer/` (`skins.md` = compliance table). Never commits.
 
 ## Architecture
 
