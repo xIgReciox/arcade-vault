@@ -2,11 +2,19 @@
 // Escrito desde cero (sin globals ni DOM). El HUD (puntuación) y los overlays de PAUSA / GAME OVER
 // los pone React; el canvas solo dibuja el campo, la serpiente y la fruta.
 
-import type { GameCallbacks, GameEngine, GameSnapshot, GameStatus } from "@/lib/game-engine";
+import type {
+  GameCallbacks,
+  GameEngine,
+  GameEngineOptions,
+  GameSnapshot,
+  GameStatus,
+} from "@/lib/game-engine";
+import { DEFAULT_SKIN, isSkinId, type SkinId } from "@/lib/skins";
 import type { SnakeAssets } from "./assets";
 import { CELL, COLS, FRUIT_POINTS, H, ROWS, START_DIR, W } from "./constants";
 import { Fruit, Snake } from "./entities";
 import { Input } from "./input";
+import { SNAKE_SKINS, type SnakePalette } from "./skins";
 import { nextTickMs } from "./utils";
 
 export type SnakeStatus = GameStatus;
@@ -17,9 +25,6 @@ export type SnakeSnapshot = GameSnapshot & { lives: null; level: null };
 export type SnakeCallbacks = GameCallbacks;
 
 const MAX_DT = 50; // ms
-
-const BG_COLOR = "#0a0a18";
-const GRID_COLOR = "rgba(120, 255, 180, 0.05)";
 
 export class SnakeEngine implements GameEngine {
   private canvas: HTMLCanvasElement;
@@ -41,8 +46,15 @@ export class SnakeEngine implements GameEngine {
   private running = false;
   private destroyed = false;
   private last: SnakeSnapshot | null = null;
+  private skin: SkinId = DEFAULT_SKIN;
+  private palette: SnakePalette = SNAKE_SKINS[DEFAULT_SKIN];
 
-  constructor(canvas: HTMLCanvasElement, callbacks: SnakeCallbacks, assets: SnakeAssets) {
+  constructor(
+    canvas: HTMLCanvasElement,
+    callbacks: SnakeCallbacks,
+    assets: SnakeAssets,
+    options: GameEngineOptions = {},
+  ) {
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Canvas 2D no disponible");
     this.canvas = canvas;
@@ -51,6 +63,7 @@ export class SnakeEngine implements GameEngine {
     this.ctx = ctx;
     this.callbacks = callbacks;
     this.assets = assets;
+    if (options.skin) this.setSkin(options.skin);
     this.input = new Input();
     this.initGame();
   }
@@ -95,6 +108,12 @@ export class SnakeEngine implements GameEngine {
   endGame(): void {
     if (this.status === "gameover") return;
     this.setGameOver();
+  }
+
+  // Cambia la paleta en caliente: solo afecta al dibujo (ni estado, ni puntuación, ni RNG).
+  setSkin(skin: SkinId): void {
+    this.skin = isSkinId(skin) ? skin : DEFAULT_SKIN;
+    this.palette = SNAKE_SKINS[this.skin];
   }
 
   destroy(): void {
@@ -207,10 +226,11 @@ export class SnakeEngine implements GameEngine {
 
   private draw(): void {
     const ctx = this.ctx;
-    ctx.fillStyle = BG_COLOR;
+    const pal = this.palette;
+    ctx.fillStyle = pal.bg;
     ctx.fillRect(0, 0, W, H);
 
-    ctx.strokeStyle = GRID_COLOR;
+    ctx.strokeStyle = pal.grid;
     ctx.lineWidth = 1;
     ctx.beginPath();
     for (let x = 0; x <= COLS; x++) {
@@ -223,7 +243,7 @@ export class SnakeEngine implements GameEngine {
     }
     ctx.stroke();
 
-    this.fruit?.draw(ctx, this.assets);
-    this.snake.draw(ctx);
+    this.fruit?.draw(ctx, this.assets.fruits[this.skin], pal);
+    this.snake.draw(ctx, pal);
   }
 }

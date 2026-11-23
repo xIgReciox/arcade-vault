@@ -2,12 +2,20 @@
 // Port encapsulado de references/started-games/04-arkanoid/game.js (sin globals ni DOM).
 // El HUD (puntuación, vidas, nivel) y los overlays de PAUSA / GAME OVER los pone React.
 
-import type { GameCallbacks, GameEngine, GameSnapshot, GameStatus } from "@/lib/game-engine";
+import type {
+  GameCallbacks,
+  GameEngine,
+  GameEngineOptions,
+  GameSnapshot,
+  GameStatus,
+} from "@/lib/game-engine";
+import { DEFAULT_SKIN, isSkinId, type SkinId } from "@/lib/skins";
 import type { ArkanoidAssets } from "./assets";
 import { BLOCK_POINTS, H, LIVES, W } from "./constants";
-import { Ball, Block, Explosion, Paddle } from "./entities";
+import { Ball, Block, Explosion, Paddle, type ArkanoidLook } from "./entities";
 import { Input, type Press } from "./input";
 import { LEVELS } from "./levels";
+import { ARKANOID_SKINS } from "./skins";
 import { collideAABB } from "./utils";
 
 export type ArkanoidStatus = GameStatus;
@@ -56,8 +64,14 @@ export class ArkanoidEngine implements GameEngine {
   private running = false;
   private destroyed = false;
   private last: ArkanoidSnapshot | null = null;
+  private look: ArkanoidLook;
 
-  constructor(canvas: HTMLCanvasElement, callbacks: ArkanoidCallbacks, assets: ArkanoidAssets) {
+  constructor(
+    canvas: HTMLCanvasElement,
+    callbacks: ArkanoidCallbacks,
+    assets: ArkanoidAssets,
+    options: GameEngineOptions = {},
+  ) {
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Canvas 2D no disponible");
     this.canvas = canvas;
@@ -66,6 +80,7 @@ export class ArkanoidEngine implements GameEngine {
     this.ctx = ctx;
     this.callbacks = callbacks;
     this.assets = assets;
+    this.look = this.lookFor(options.skin ?? DEFAULT_SKIN);
     this.input = new Input(canvas);
     this.initGame();
   }
@@ -109,6 +124,16 @@ export class ArkanoidEngine implements GameEngine {
   endGame(): void {
     if (this.status === "gameover") return;
     this.setGameOver();
+  }
+
+  // Cambia la paleta en caliente: solo afecta al dibujo (ni estado, ni puntuación, ni niveles).
+  setSkin(skin: SkinId): void {
+    this.look = this.lookFor(skin);
+  }
+
+  private lookFor(skin: SkinId): ArkanoidLook {
+    const id = isSkinId(skin) ? skin : DEFAULT_SKIN;
+    return { sheet: this.assets.sheets[id], palette: ARKANOID_SKINS[id] };
   }
 
   destroy(): void {
@@ -272,13 +297,14 @@ export class ArkanoidEngine implements GameEngine {
 
   private draw(): void {
     const ctx = this.ctx;
-    ctx.fillStyle = "#000";
+    const look = this.look;
+    ctx.fillStyle = look.palette.bg;
     ctx.fillRect(0, 0, W, H);
 
-    for (const block of this.blocks) block.draw(ctx, this.assets);
-    for (const exp of this.explosions) exp.draw(ctx, this.assets);
-    this.paddle.draw(ctx, this.assets);
-    this.ball.draw(ctx, this.assets);
+    for (const block of this.blocks) block.draw(ctx, look);
+    for (const exp of this.explosions) exp.draw(ctx, look);
+    this.paddle.draw(ctx, look);
+    this.ball.draw(ctx, look);
 
     if (this.status === "paused") this.drawPauseHelp(ctx);
   }
@@ -289,11 +315,11 @@ export class ArkanoidEngine implements GameEngine {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.font = "bold 20px monospace";
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = this.look.palette.helpText;
     ctx.fillText(HELP_TEXT, W / 2, HELP_Y);
     if (this.muted) {
       ctx.font = "bold 16px monospace";
-      ctx.fillStyle = "#f0c040";
+      ctx.fillStyle = this.look.palette.muteText;
       ctx.fillText("SONIDO OFF", W / 2, MUTE_Y);
     }
     ctx.restore();

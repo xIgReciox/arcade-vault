@@ -1,7 +1,8 @@
 // Entidades del juego SNAKE: la serpiente (cuerpo por casillas) y la fruta.
 
-import type { SnakeAssets } from "./assets";
+import type { FruitSheet } from "./assets";
 import { CELL, COLS, ROWS, START_DIR, START_HEAD_X, START_HEAD_Y, START_LENGTH } from "./constants";
+import type { SnakePalette } from "./skins";
 import { FRUIT_NAMES, FRUIT_SPRITES } from "./sprites";
 import { randomFreeCell, type Cell, type Direction } from "./utils";
 
@@ -12,10 +13,6 @@ const DELTA: Record<Direction, Cell> = {
   right: { x: 1, y: 0 },
 };
 
-const BODY_COLOR = "#2bd96b";
-const HEAD_COLOR = "#7dffa8";
-const GLOW_COLOR = "#39ff88";
-const FRUIT_FALLBACK_COLOR = "#ff2bd6";
 const SEGMENT_INSET = 3;
 const SEGMENT_RADIUS = 10;
 const FRUIT_SIZE = 36; // alto del sprite dentro de la casilla de 40 px
@@ -68,7 +65,7 @@ export class Snake {
     this.dir = dir;
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
+  draw(ctx: CanvasRenderingContext2D, pal: SnakePalette): void {
     ctx.save();
 
     // Un solo trazado para todo el cuerpo: el glow se aplica una vez por grupo, no por segmento.
@@ -91,9 +88,9 @@ export class Snake {
       const h = Math.abs(c.y - p.y) * CELL + size;
       ctx.roundRect(x, y, w, h, SEGMENT_RADIUS);
     }
-    ctx.shadowColor = GLOW_COLOR;
-    ctx.shadowBlur = 12;
-    ctx.fillStyle = BODY_COLOR;
+    ctx.shadowColor = pal.glowColor;
+    ctx.shadowBlur = pal.glow;
+    ctx.fillStyle = pal.body;
     ctx.fill();
 
     // Cabeza
@@ -106,7 +103,7 @@ export class Snake {
       size + 2,
       SEGMENT_RADIUS,
     );
-    ctx.fillStyle = HEAD_COLOR;
+    ctx.fillStyle = pal.head;
     ctx.fill();
 
     // Ojos, sin glow
@@ -122,11 +119,11 @@ export class Snake {
       const ey = cy + py * side * 8;
       ctx.beginPath();
       ctx.arc(ex, ey, 4.5, 0, Math.PI * 2);
-      ctx.fillStyle = "#ffffff";
+      ctx.fillStyle = pal.eye;
       ctx.fill();
       ctx.beginPath();
       ctx.arc(ex + d.x * 1.5, ey + d.y * 1.5, 2.2, 0, Math.PI * 2);
-      ctx.fillStyle = "#0a0a18";
+      ctx.fillStyle = pal.pupil;
       ctx.fill();
     }
 
@@ -156,37 +153,46 @@ export class Fruit {
     this.t += dt;
   }
 
-  draw(ctx: CanvasRenderingContext2D, assets: SnakeAssets): void {
+  draw(ctx: CanvasRenderingContext2D, sheet: FruitSheet | null, pal: SnakePalette): void {
     const cx = this.cell.x * CELL + CELL / 2;
     const cy = this.cell.y * CELL + CELL / 2;
     const pulse = 1 + Math.sin(this.t * 5) * 0.04;
 
     ctx.save();
-    if (assets.fruits) {
+    if (sheet) {
       const frame = FRUIT_SPRITES[this.sprite];
       // Escalado uniforme por la altura, centrado en la casilla: sin deformar el ancho.
       const scale = (FRUIT_SIZE / frame.h) * pulse;
       const dw = frame.w * scale;
       const dh = frame.h * scale;
+      const s = sheet.scale;
+      // Hoja reducida (retro): se amplía sin suavizado para que se vea pixelada.
+      if (s < 1) ctx.imageSmoothingEnabled = false;
+      if (pal.fruitGlow > 0) {
+        ctx.shadowColor = pal.fruitGlowColor;
+        ctx.shadowBlur = pal.fruitGlow;
+      }
       ctx.drawImage(
-        assets.fruits,
-        frame.x,
-        frame.y,
-        frame.w,
-        frame.h,
+        sheet.image,
+        frame.x * s,
+        frame.y * s,
+        frame.w * s,
+        frame.h * s,
         cx - dw / 2,
         cy - dh / 2,
         dw,
         dh,
       );
+      ctx.shadowBlur = 0;
     } else {
       // Respaldo si fruits.png no cargó.
-      ctx.shadowColor = FRUIT_FALLBACK_COLOR;
-      ctx.shadowBlur = 12;
-      ctx.fillStyle = FRUIT_FALLBACK_COLOR;
+      ctx.shadowColor = pal.fruitGlowColor;
+      ctx.shadowBlur = pal.glow;
+      ctx.fillStyle = pal.fruitFallback;
       ctx.beginPath();
       ctx.arc(cx, cy, 12 * pulse, 0, Math.PI * 2);
       ctx.fill();
+      ctx.shadowBlur = 0;
     }
     ctx.restore();
   }

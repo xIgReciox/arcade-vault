@@ -15,15 +15,4 @@ export const POWERUP_TTL = 12; // segundos que el power-up flota antes de desapa
 export const POWERUP_GUARANTEED_KILLS = 5; // baja garantizada tras N asteroides destruidos
 export const TRIPLE_SPREAD = 0.18; // rad entre balas del disparo triple
 
-// Colores neón (valores de la plataforma en app/globals.css)
-export const COLORS = {
-  cyan: "#00f5ff", // nave
-  yellow: "#f5ff00", // asteroides
-  white: "#ffffff", // balas
-  magenta: "#ff006e", // power-up
-  orange: "rgba(255, 130, 0, 0.85)", // llama del propulsor
-  bg: "#000000",
-} as const;
-
-// Intensidad base del glow (shadowBlur)
-export const GLOW = 8;
+// Colores y glow: ver lib/asteroids/skins.ts (paleta activa del motor).
