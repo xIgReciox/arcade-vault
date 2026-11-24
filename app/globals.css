@@ -1623,6 +1623,10 @@ a {
   .crt-bottom {
     display: none;
   }
+  /* ≥ 16 px: evita el zoom automático de iOS al enfocar el campo de nombre del modal. */
+  .modal .input-row input {
+    font-size: 16px;
+  }
   /* HUD compacto: una fila de estadísticas (sin JUGADOR ni las que son null) y otra de acciones. */
   .player-hud {
     flex-direction: column;
