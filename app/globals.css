@@ -2797,3 +2797,8 @@ a {
   line-height: 1.5;
   text-shadow: 0 0 6px rgba(255, 0, 110, 0.45);
 }
+
+/* Mando táctil (SPEC 11): oculto por defecto; el paso 5 lo muestra con puntero táctil. */
+.touch-controls {
+  display: none;
+}

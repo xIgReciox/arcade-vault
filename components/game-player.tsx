@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { GameCanvas } from "@/components/games/game-canvas";
 import { SkinPicker } from "@/components/games/skin-picker";
+import { TouchControls } from "@/components/games/touch-controls";
 import type { GameSnapshot } from "@/lib/game-engine";
 import { DEFAULT_SKIN, readStoredSkin, type SkinId, writeStoredSkin } from "@/lib/skins";
 import { getPlayable } from "@/lib/playable-games";
@@ -238,6 +239,8 @@ export function GamePlayer({ game }: { game: Game }) {
           <span>CARGA · 1MB</span>
         </div>
       </div>
+
+      {playable?.touch && <TouchControls layout={playable.touch} paused={paused} over={over} />}
 
       {playable && playable.skins.length > 1 && (
         <SkinPicker skins={playable.skins} value={skin} onChange={handleSkinChange} />
