@@ -21,7 +21,7 @@ const ACTIVE: Record<SkinId, string> = {
 // Selector de paleta del reproductor: fila de botones de "canal" bajo el monitor CRT.
 export function SkinPicker({ skins, value, onChange }: SkinPickerProps) {
   return (
-    <div className="mt-3.5 flex flex-wrap items-center justify-between gap-x-5 gap-y-3 border border-white/5 bg-bg-2 px-3.5 py-3">
+    <div className="mt-3.5 flex flex-wrap items-center justify-between gap-x-5 gap-y-3 border border-white/5 bg-bg-2 px-3.5 py-3 max-[720px]:mt-2 max-[720px]:py-2">
       <div
         className="flex flex-wrap items-center gap-2.5"
         role="group"
@@ -43,7 +43,7 @@ export function SkinPicker({ skins, value, onChange }: SkinPickerProps) {
                 e.currentTarget.blur();
                 onChange(id);
               }}
-              className={`group inline-flex cursor-pointer items-center gap-2.5 border border-ink-faint px-3.5 py-2.5 font-pixel text-[9px] tracking-[0.14em] text-ink-dim transition-[color,border-color,box-shadow,background-color] duration-150 hover:border-ink-dim hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink motion-reduce:transition-none ${ACTIVE[id]}`}
+              className={`group inline-flex cursor-pointer items-center gap-2.5 border border-ink-faint px-3.5 py-2.5 max-[720px]:px-2.5 max-[720px]:py-1.5 font-pixel text-[9px] tracking-[0.14em] text-ink-dim transition-[color,border-color,box-shadow,background-color] duration-150 hover:border-ink-dim hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink motion-reduce:transition-none ${ACTIVE[id]}`}
             >
               <span className="inline-flex gap-0.5" aria-hidden>
                 {meta.swatch.map((c) => (
@@ -59,7 +59,7 @@ export function SkinPicker({ skins, value, onChange }: SkinPickerProps) {
           );
         })}
       </div>
-      <p className="m-0 font-mono text-xs text-ink-dim" aria-live="polite">
+      <p className="m-0 font-mono text-xs text-ink-dim max-[720px]:hidden" aria-live="polite">
         {SKINS[value].description}
       </p>
     </div>

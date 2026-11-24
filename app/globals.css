@@ -998,6 +998,11 @@ a {
   margin-bottom: 18px;
   flex-wrap: wrap;
 }
+.hud-stats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
 .hud-stat {
   display: flex;
   flex-direction: column;
@@ -1617,6 +1622,47 @@ a {
   }
   .crt-bottom {
     display: none;
+  }
+  /* HUD compacto: una fila de estadísticas (sin JUGADOR ni las que son null) y otra de acciones. */
+  .player-hud {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 0;
+    padding: 8px 12px;
+    border-left: 0;
+    border-right: 0;
+  }
+  .hud-stats {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .hud-stat {
+    gap: 2px;
+  }
+  .hud-stat .l {
+    font-size: 9px;
+  }
+  .hud-stat .v {
+    font-size: 13px;
+  }
+  .hud-player,
+  .hud-stat.is-null {
+    display: none;
+  }
+  .hud-actions {
+    gap: 8px;
+  }
+  .hud-actions .btn {
+    flex: 1;
+    padding: 8px 10px;
+    min-height: 40px;
+  }
+  .touch-controls {
+    margin-top: 8px;
+    padding-top: 10px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   }
   .crt-screen {
     width: 100%;
