@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { GameCanvas } from "@/components/games/game-canvas";
 import { SkinPicker } from "@/components/games/skin-picker";
+import { TouchControls } from "@/components/games/touch-controls";
 import type { GameSnapshot } from "@/lib/game-engine";
 import { DEFAULT_SKIN, readStoredSkin, type SkinId, writeStoredSkin } from "@/lib/skins";
 import { getPlayable } from "@/lib/playable-games";
@@ -144,8 +145,8 @@ export function GamePlayer({ game }: { game: Game }) {
   return (
     <div className="av-player fade-in">
       <div className="player-hud">
-        <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-          <div className="hud-stat">
+        <div className="hud-stats">
+          <div className="hud-stat hud-player">
             <div className="l">Jugador</div>
             <div className="v" style={{ color: "var(--ink)" }}>
               {name}
@@ -155,11 +156,12 @@ export function GamePlayer({ game }: { game: Game }) {
             <div className="l">Puntuación</div>
             <div className="v">{score.toLocaleString("es-ES")}</div>
           </div>
-          <div className="hud-stat lives">
+          {/* is-null: en móvil se omite la estadística que el juego no tiene */}
+          <div className={`hud-stat lives${lives === null ? " is-null" : ""}`}>
             <div className="l">Vidas</div>
             <div className="v">{lives === null ? "—" : "♥ ".repeat(lives).trim() || "—"}</div>
           </div>
-          <div className="hud-stat level">
+          <div className={`hud-stat level${level === null ? " is-null" : ""}`}>
             <div className="l">Nivel</div>
             <div className="v">{level === null ? "—" : String(level).padStart(2, "0")}</div>
           </div>
@@ -238,6 +240,8 @@ export function GamePlayer({ game }: { game: Game }) {
           <span>CARGA · 1MB</span>
         </div>
       </div>
+
+      {playable?.touch && <TouchControls layout={playable.touch} paused={paused} over={over} />}
 
       {playable && playable.skins.length > 1 && (
         <SkinPicker skins={playable.skins} value={skin} onChange={handleSkinChange} />

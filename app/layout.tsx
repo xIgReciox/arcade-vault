@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Courier_Prime, JetBrains_Mono, Press_Start_2P } from "next/font/google";
 import { AuthProvider } from "@/components/auth-provider";
 import { Footer } from "@/components/footer";
@@ -25,8 +25,12 @@ const courierPrime = Courier_Prime({
 
 export const metadata: Metadata = {
   title: "Arcade Vault · Portal Retro",
-  description:
-    "Juega online y compite por el puntaje más alto en Arcade Vault.",
+  description: "Juega online y compite por el puntaje más alto en Arcade Vault.",
+};
+
+// viewportFit "cover": el mando táctil respeta env(safe-area-inset-bottom) (SPEC 11).
+export const viewport: Viewport = {
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

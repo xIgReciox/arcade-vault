@@ -998,6 +998,11 @@ a {
   margin-bottom: 18px;
   flex-wrap: wrap;
 }
+.hud-stats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
 .hud-stat {
   display: flex;
   flex-direction: column;
@@ -1604,8 +1609,76 @@ a {
     padding: 0 16px;
     margin: 24px auto;
   }
+  /* Reproductor móvil (SPEC 11): sin marco CRT, canvas 4:3 a todo el ancho bajo el HUD. */
   .av-player {
-    padding: 0 16px 32px;
+    margin: 8px auto 0;
+    padding: 0 0 32px;
+  }
+  .crt {
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .crt-bottom {
+    display: none;
+  }
+  /* ≥ 16 px: evita el zoom automático de iOS al enfocar el campo de nombre del modal. */
+  .modal .input-row input {
+    font-size: 16px;
+  }
+  /* HUD compacto: una fila de estadísticas (sin JUGADOR ni las que son null) y otra de acciones. */
+  .player-hud {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 0;
+    padding: 8px 12px;
+    border-left: 0;
+    border-right: 0;
+  }
+  .hud-stats {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .hud-stat {
+    gap: 2px;
+  }
+  .hud-stat .l {
+    font-size: 9px;
+  }
+  .hud-stat .v {
+    font-size: 13px;
+  }
+  .hud-player,
+  .hud-stat.is-null {
+    display: none;
+  }
+  .hud-actions {
+    gap: 8px;
+  }
+  .hud-actions .btn {
+    flex: 1;
+    padding: 8px 10px;
+    min-height: 40px;
+  }
+  .touch-controls {
+    margin-top: 8px;
+    padding-top: 10px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+  .crt-screen {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: 0;
+  }
+  .crt-screen canvas {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
@@ -2796,4 +2869,153 @@ a {
   letter-spacing: 0.06em;
   line-height: 1.5;
   text-shadow: 0 0 6px rgba(255, 0, 110, 0.45);
+}
+
+/* ── Mando táctil (SPEC 11) ─────────────────────────────────────────────
+   Consola de arcade bajo la pantalla: cruceta en cruz a la izquierda, botones convexos a la
+   derecha (A magenta, B cyan). Oculto salvo con puntero táctil (ver @media al final del bloque). */
+.touch-controls {
+  --touch-cell: 56px;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 18px 14px calc(18px + env(safe-area-inset-bottom, 0px));
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--bg-2), var(--bg));
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+
+.touch-key {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--pixel);
+  color: var(--cyan);
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  transition:
+    transform 60ms ease-out,
+    background-color 60ms ease-out,
+    box-shadow 60ms ease-out;
+}
+
+/* Cruceta: grilla 3×3 con una placa en cruz detrás; las direcciones sin uso no se dibujan,
+   pero la cruz conserva su forma. */
+.touch-pad {
+  display: grid;
+  grid-template-columns: repeat(3, var(--touch-cell));
+  grid-template-rows: repeat(3, var(--touch-cell));
+  flex: none;
+  border-radius: 14px;
+  background:
+    linear-gradient(var(--bg-3), var(--bg-3)) center / 100% 33.34% no-repeat,
+    linear-gradient(var(--bg-3), var(--bg-3)) center / 33.34% 100% no-repeat;
+}
+.touch-pad:only-child {
+  margin: 0 auto;
+}
+.touch-dir {
+  min-width: 56px;
+  min-height: 56px;
+  border: 1px solid rgba(0, 245, 255, 0.4);
+  border-radius: 8px;
+  background: rgba(0, 245, 255, 0.04);
+  font-size: 20px;
+  text-shadow: 0 0 8px rgba(0, 245, 255, 0.6);
+}
+.touch-dir[data-dir="up"] {
+  grid-column: 2;
+  grid-row: 1;
+}
+.touch-dir[data-dir="left"] {
+  grid-column: 1;
+  grid-row: 2;
+}
+.touch-dir[data-dir="right"] {
+  grid-column: 3;
+  grid-row: 2;
+}
+.touch-dir[data-dir="down"] {
+  grid-column: 2;
+  grid-row: 3;
+}
+.touch-dir:active {
+  transform: scale(0.94);
+  background: rgba(0, 245, 255, 0.24);
+  box-shadow:
+    0 0 14px rgba(0, 245, 255, 0.55),
+    inset 0 0 12px rgba(0, 245, 255, 0.35);
+}
+
+/* Botones: circulares y convexos. Con A y B, A queda más alto (disposición de recreativa). */
+.touch-actions {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-end;
+  gap: 10px;
+}
+.touch-btn {
+  width: 64px;
+  height: 64px;
+  min-width: 56px;
+  min-height: 56px;
+  border-radius: 50%;
+  font-size: 18px;
+  border: 2px solid var(--cyan);
+  color: var(--ink);
+  background: radial-gradient(
+    circle at 35% 28%,
+    rgba(0, 245, 255, 0.55),
+    rgba(0, 245, 255, 0.1) 70%
+  );
+  text-shadow: 0 0 8px rgba(0, 245, 255, 0.8);
+  box-shadow:
+    0 4px 0 rgba(0, 245, 255, 0.25),
+    0 0 16px rgba(0, 245, 255, 0.35);
+}
+.touch-btn[data-btn="A"] {
+  border-color: var(--magenta);
+  background: radial-gradient(
+    circle at 35% 28%,
+    rgba(255, 0, 110, 0.6),
+    rgba(255, 0, 110, 0.12) 70%
+  );
+  text-shadow: 0 0 8px rgba(255, 0, 110, 0.8);
+  box-shadow:
+    0 4px 0 rgba(255, 0, 110, 0.28),
+    0 0 16px rgba(255, 0, 110, 0.4);
+}
+.touch-actions:has(.touch-btn[data-btn="B"]) .touch-btn[data-btn="A"] {
+  margin-bottom: 28px;
+}
+.touch-btn:active {
+  transform: translateY(3px) scale(0.96);
+  box-shadow:
+    0 1px 0 rgba(0, 245, 255, 0.25),
+    0 0 26px rgba(0, 245, 255, 0.7),
+    inset 0 0 16px rgba(0, 245, 255, 0.5);
+}
+.touch-btn[data-btn="A"]:active {
+  box-shadow:
+    0 1px 0 rgba(255, 0, 110, 0.28),
+    0 0 26px rgba(255, 0, 110, 0.75),
+    inset 0 0 16px rgba(255, 0, 110, 0.5);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .touch-controls {
+    display: flex;
+  }
 }

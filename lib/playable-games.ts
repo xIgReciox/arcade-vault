@@ -4,6 +4,20 @@
 import type { GameEngineFactory } from "@/lib/game-engine";
 import { SKIN_IDS, type SkinId } from "@/lib/skins";
 
+export type TouchDirection = "left" | "right" | "up" | "down";
+
+export interface TouchButton {
+  label: "A" | "B"; // texto del botón
+  code: string; // KeyboardEvent.code que se emite, p. ej. "Space"
+  aria: string; // etiqueta accesible, p. ej. "Disparar"
+}
+
+export interface TouchLayout {
+  directions: readonly TouchDirection[]; // flechas visibles de la cruceta
+  buttons: readonly TouchButton[]; // 0, 1 o 2; los no usados no se muestran
+  repeat: readonly TouchDirection[]; // direcciones con auto-repeat emulado
+}
+
 export interface PlayableGame {
   load: () => Promise<GameEngineFactory>; // import() diferido del motor
   width: number; // resolución interna del canvas
@@ -12,6 +26,8 @@ export interface PlayableGame {
   // Skins que el motor soporta vía setSkin. Objetivo: los tres (auditado por skin-designer).
   // Con uno solo, el reproductor no muestra selector.
   skins: readonly SkinId[];
+  // Mando táctil (SPEC 11). Sin definir, el reproductor no muestra mando.
+  touch?: TouchLayout;
 }
 
 export const PLAYABLE_GAMES: Record<string, PlayableGame> = {
@@ -24,6 +40,11 @@ export const PLAYABLE_GAMES: Record<string, PlayableGame> = {
     height: 600,
     label: "Juego ASTEROIDS",
     skins: SKIN_IDS,
+    touch: {
+      directions: ["left", "right", "up"], // up = empuje
+      buttons: [{ label: "A", code: "Space", aria: "Disparar" }],
+      repeat: [], // el motor lee la tecla mantenida
+    },
   },
   tetris: {
     load: async () => {
@@ -34,6 +55,14 @@ export const PLAYABLE_GAMES: Record<string, PlayableGame> = {
     height: 600,
     label: "Juego TETRIS",
     skins: ["clasico"], // pendiente: neon y retro
+    touch: {
+      directions: ["left", "right", "up", "down"], // up = rotar
+      buttons: [
+        { label: "A", code: "Space", aria: "Caída" },
+        { label: "B", code: "KeyX", aria: "Rotar" },
+      ],
+      repeat: ["left", "right", "down"], // su Input depende del auto-repeat del navegador
+    },
   },
   arkanoid: {
     load: async () => {
@@ -47,6 +76,11 @@ export const PLAYABLE_GAMES: Record<string, PlayableGame> = {
     height: 600,
     label: "Juego ARKANOID",
     skins: SKIN_IDS,
+    touch: {
+      directions: ["left", "right"],
+      buttons: [],
+      repeat: [], // el motor lee la tecla mantenida
+    },
   },
   snake: {
     load: async () => {
@@ -61,6 +95,11 @@ export const PLAYABLE_GAMES: Record<string, PlayableGame> = {
     height: 600,
     label: "Juego SNAKE",
     skins: SKIN_IDS,
+    touch: {
+      directions: ["left", "right", "up", "down"],
+      buttons: [],
+      repeat: [], // giro discreto: ignora e.repeat
+    },
   },
 };
 
