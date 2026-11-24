@@ -6,12 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Arcade Vault: a platform for playing retro arcade games online and competing for the highest score (UI and copy in Spanish). Built with Spec Driven Design: every feature starts as a spec in `specs/NN-slug.md` (`/spec`) and is implemented step by step with `/spec-impl`.
 
-Current state (specs 01–10 implemented):
+Current state (specs 01–11 implemented):
 
 - Screens: home/landing (`/`), about + contact form (`/about`), auth (`/auth`), library (`/games`), game detail with real leaderboard (`/games/[id]`), player (`/games/[id]/jugar`), Hall of Fame (`/salon`).
 - Playable games (real canvas engines): **ASTEROIDS**, **TETRIS**, **ARKANOID**, **SNAKE** and more. Other entries in `GAMES` are mocks with a simulated player.
   (see references/implemented-games.md) when you need to check with games are implemented and how to implementent new ones.
 
+- Touch controls (SPEC 11): the 4 real games are playable on mobile with a virtual gamepad (d-pad + up to 2 buttons) under the canvas; mobile player layout (≤ 720 px) with compact HUD and no CRT frame.
 - Real leaderboards in Supabase (`games` + `scores` tables). Auth is still a localStorage mock (`components/auth-provider.tsx`, key `av_user`); scores are inserted anonymously (`user_id = null`).
 - Contact form sends real email via Resend (`app/about/actions.ts`).
 
@@ -61,6 +62,7 @@ Project agents (`.claude/agents/`):
 - Each game lives in `lib/<id>/` (`constants`, `utils`, `input`, `entities` or `rules`, `engine`, optional `assets`/`sprites`). Engines: no globals, `dt` capped at 50 ms, `P`/`Escape` toggle pause, no PAUSE/GAME OVER overlays on canvas (React draws them), input listeners attached/detached on `window`.
 - `lib/playable-games.ts` — `PLAYABLE_GAMES` registry keyed by game id: lazy `load()` via `import()` (preloads assets, never rejects), canvas `width`/`height` (800×600), `label`. Client-only.
 - `components/games/game-canvas.tsx` mounts the engine (Strict-Mode safe, auto-pause on tab hide); `components/game-player.tsx` owns HUD, pause, end-of-game modal and score saving. Games not in `PLAYABLE_GAMES` fall back to the simulated player.
+- Touch controls: `PlayableGame.touch` (`TouchLayout`: `directions`, `buttons` A/B with `code`, `repeat`) in `lib/playable-games.ts`; `components/games/touch-controls.tsx` renders the gamepad and `lib/touch-input.ts` (`createKeyHold`) dispatches synthetic `KeyboardEvent`s on `window` (same `code` as the keyboard, auto-repeat 170/50 ms only where listed in `repeat`), so engines are untouched. Shown only with `(hover: none) and (pointer: coarse)` (CSS). A new game gets a gamepad by declaring `touch`; its `input.ts` must read `e.code` on `window`. Verify with a Playwright context `hasTouch` + `isMobile` (`browser_run_code_unsafe`), not `browser_resize`.
 - Game assets go in `public/games/<id>/` and are loaded as `/games/<id>/...`.
 - Skins: every playable game must offer `clasico` (default), `neon` and `retro` (palettes in `lib/<id>/skins.ts`, hot-swappable via `GameEngine.setSkin`, listed in `PlayableGame.skins`). Run the `skin-designer` agent to audit/implement.
 

@@ -1,6 +1,6 @@
 # SPEC 11 — Controles táctiles para jugar en móvil
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 05, SPEC 07, SPEC 08, SPEC 09, SPEC 10
 > **Date:** 2026-11-24
 > **Objective:** Hacer jugables en un móvil con pantalla táctil los 4 juegos reales (ASTEROIDS, TETRIS, ARKANOID y SNAKE) con un layout vertical de canvas arriba y un mando virtual (cruceta + hasta 2 botones) abajo, sin cambiar ningún motor.
